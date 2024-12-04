@@ -38,3 +38,21 @@ func (d Date) Compare(u Date) int {
 func (d Date) Equal(u Date) bool {
 	return d.Time().Equal(u.Time())
 }
+
+func ListDaysInMonth(year int, month int) []int {
+	days := make([]int, DaysInMonth(year, month))
+
+	for i := range days {
+		days[i] = i + 1
+	}
+	return days
+}
+
+func DaysInMonth(year int, month int) int {
+	return DaysInMonthByDate(GetDate(year, month, 1))
+}
+
+func DaysInMonthByDate(t time.Time) int {
+	y, m, _ := t.Date()
+	return time.Date(y, m+1, 0, 0, 0, 0, 0, time.UTC).Day()
+}

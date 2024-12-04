@@ -1,7 +1,7 @@
 package datetime
 
 import (
-	"github.com/Gouef/utils"
+	"github.com/gouef/utils"
 	"time"
 )
 

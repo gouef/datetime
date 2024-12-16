@@ -119,7 +119,6 @@ func TestCalculateEaster(t *testing.T) {
 		},
 	}
 
-	datetime.TestYears()
 	for _, tt := range tests {
 		t.Run("TestCalculate", func(t *testing.T) {
 			actual := datetime.Calculate(tt.year)

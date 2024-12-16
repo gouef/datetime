@@ -87,6 +87,30 @@ func TestCalculateEaster(t *testing.T) {
 			expected:      time.Date(1981, time.April, 19, 0, 0, 0, 0, time.UTC),
 			expectedError: true,
 		},
+		// Test 9:
+		{
+			year:          1993,
+			expected:      time.Date(1993, time.April, 11, 0, 0, 0, 0, time.UTC),
+			expectedError: true,
+		},
+		// Test 10:
+		{
+			year:          2010,
+			expected:      time.Date(2010, time.April, 4, 0, 0, 0, 0, time.UTC),
+			expectedError: true,
+		},
+		// Test 11:
+		{
+			year:          1700,
+			expected:      time.Date(1700, time.April, 11, 0, 0, 0, 0, time.UTC),
+			expectedError: true,
+		},
+		// Test 12:
+		{
+			year:          1742,
+			expected:      time.Date(1742, time.March, 25, 0, 0, 0, 0, time.UTC),
+			expectedError: true,
+		},
 	}
 
 	for _, tt := range tests {

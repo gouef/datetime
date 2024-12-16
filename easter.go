@@ -54,7 +54,9 @@ func cyclesVar(year int) (int, int, int) {
 }
 
 func easterVar(year int) (int, int) {
-	if between(year, 1800, 1899) {
+	if between(year, 1700, 1799) {
+		return 23, 3
+	} else if between(year, 1800, 1899) {
 		return 23, 4
 	} else if between(year, 1900, 2099) {
 		return 24, 5

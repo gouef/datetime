@@ -24,10 +24,10 @@ func Calculate(year int) time.Time {
 
 	var easterSunday time.Time
 	switch {
-	case s1 >= 22 && s1 <= 31:
-		easterSunday = GetDate(year, 3, s1)
 	case s2 == 25 && d == 28 && e == 6 && a > 10:
 		easterSunday = GetDate(year, 4, 18)
+	case s1 >= 22 && s1 <= 31:
+		easterSunday = GetDate(year, 3, s1)
 	case s2 <= 25:
 		easterSunday = GetDate(year, 4, s2)
 	default:

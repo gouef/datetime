@@ -111,8 +111,15 @@ func TestCalculateEaster(t *testing.T) {
 			expected:      time.Date(1742, time.March, 25, 0, 0, 0, 0, time.UTC),
 			expectedError: true,
 		},
+		// Test 13:
+		{
+			year:          2049,
+			expected:      time.Date(2049, time.April, 18, 0, 0, 0, 0, time.UTC),
+			expectedError: true,
+		},
 	}
 
+	datetime.TestYears()
 	for _, tt := range tests {
 		t.Run("TestCalculate", func(t *testing.T) {
 			actual := datetime.Calculate(tt.year)

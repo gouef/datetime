@@ -1,6 +1,7 @@
 package datetime
 
 import (
+	"fmt"
 	"github.com/gouef/utils"
 	"time"
 )
@@ -12,8 +13,22 @@ type Date struct {
 	DateTime time.Time
 }
 
-func NewDate(year int, month int, day int) *Date {
-	return &Date{Year: year, Month: month, Day: day, DateTime: GetDate(year, month, day)}
+func NewDate(year int, month int, day int) (*Date, error) {
+	if month < 1 || month > 12 {
+		return nil, fmt.Errorf("invalid month: %d", month)
+	}
+
+	daysInMonth := DaysInMonth(year, month)
+	if day < 1 || day > daysInMonth {
+		return nil, fmt.Errorf("invalid day: %d for month %d", day, month)
+	}
+
+	return &Date{
+		Year:     year,
+		Month:    month,
+		Day:      day,
+		DateTime: GetDate(year, month, day),
+	}, nil
 }
 
 func GetDate(year int, month int, day int) time.Time {
@@ -39,7 +54,7 @@ func (d Date) Equal(u Date) bool {
 	return d.Time().Equal(u.Time())
 }
 
-func ListDaysInMonth(year int, month int) []int {
+func DaysInMonthList(year int, month int) []int {
 	days := make([]int, DaysInMonth(year, month))
 
 	for i := range days {

@@ -1,12 +1,11 @@
 package datetime
 
 import (
-	"fmt"
 	"time"
 )
 
 func GetEaster(year int) time.Time {
-	easter, _ := calculate(year)
+	easter := Calculate(year)
 	return easter
 }
 
@@ -20,7 +19,7 @@ func GetGoodFriday(year int) time.Time {
 	return easter.AddDate(0, 0, -2)
 }
 
-func calculate(year int) (time.Time, error) {
+func Calculate(year int) time.Time {
 	s1, s2, d, e, a := calculatableVars(year)
 
 	var easterSunday time.Time
@@ -31,13 +30,11 @@ func calculate(year int) (time.Time, error) {
 		easterSunday = GetDate(year, 4, 18)
 	case s2 <= 25:
 		easterSunday = GetDate(year, 4, s2)
-	case s2 > 25:
-		easterSunday = GetDate(year, 4, s2-7)
 	default:
-		return time.Time{}, fmt.Errorf("error calculating Easter Sunday for Year %d", year)
+		easterSunday = GetDate(year, 4, s2-7)
 	}
 
-	return easterSunday, nil
+	return easterSunday
 }
 
 func calculatableVars(year int) (int, int, int, int, int) {

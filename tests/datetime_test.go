@@ -72,6 +72,46 @@ func TestCompare(t *testing.T) {
 	}
 }
 
+func TestDateEqual(t *testing.T) {
+	tests := []struct {
+		date1    datetime.Date
+		date2    datetime.Date
+		expected bool
+	}{
+		// Test 1: Equal Date instances
+		{
+			date1:    datetime.Date{Year: 2024, Month: 3, Day: 31},
+			date2:    datetime.Date{Year: 2024, Month: 3, Day: 31},
+			expected: true,
+		},
+		// Test 2: Different Date instances (different day)
+		{
+			date1:    datetime.Date{Year: 2024, Month: 3, Day: 31},
+			date2:    datetime.Date{Year: 2024, Month: 3, Day: 30},
+			expected: false,
+		},
+		// Test 3: Different Date instances (different month)
+		{
+			date1:    datetime.Date{Year: 2024, Month: 3, Day: 31},
+			date2:    datetime.Date{Year: 2024, Month: 4, Day: 1},
+			expected: false,
+		},
+		// Test 4: Different Date instances (different year)
+		{
+			date1:    datetime.Date{Year: 2024, Month: 3, Day: 31},
+			date2:    datetime.Date{Year: 2025, Month: 3, Day: 31},
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run("TestEqual", func(t *testing.T) {
+			result := tt.date1.Equal(tt.date2)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
 func TestDaysInMonthList(t *testing.T) {
 	tests := []struct {
 		year     int

@@ -33,6 +33,70 @@ func TestGetEaster(t *testing.T) {
 	}
 }
 
+func TestCalculateEaster(t *testing.T) {
+	tests := []struct {
+		year          int
+		expected      time.Time
+		expectedError bool
+	}{
+		// Test 1: Standardní výpočet
+		{
+			year:          2024,
+			expected:      time.Date(2024, time.March, 31, 0, 0, 0, 0, time.UTC),
+			expectedError: false,
+		},
+		// Test 2: Složitější výpočet podle s2 == 25 && d == 28 && e == 6 && a > 10
+		{
+			year:          2025,
+			expected:      time.Date(2025, time.April, 20, 0, 0, 0, 0, time.UTC),
+			expectedError: false,
+		},
+		// Test 3: Příklad pro s2 > 25 (posun o 7 dní zpět)
+		{
+			year:          2023,
+			expected:      time.Date(2023, time.April, 9, 0, 0, 0, 0, time.UTC),
+			expectedError: false,
+		},
+		// Test 4:
+		{
+			year:          1850,
+			expected:      time.Date(1850, time.March, 31, 0, 0, 0, 0, time.UTC),
+			expectedError: false,
+		},
+		// Test 5:
+		{
+			year:          2100,
+			expected:      time.Date(2100, time.April, 6, 0, 0, 0, 0, time.UTC),
+			expectedError: true,
+		},
+		// Test 6:
+		{
+			year:          2016,
+			expected:      time.Date(2016, time.March, 27, 0, 0, 0, 0, time.UTC),
+			expectedError: true,
+		},
+		// Test 7:
+		{
+			year:          1969,
+			expected:      time.Date(1969, time.April, 6, 0, 0, 0, 0, time.UTC),
+			expectedError: true,
+		},
+		// Test 8:
+		{
+			year:          1981,
+			expected:      time.Date(1981, time.April, 19, 0, 0, 0, 0, time.UTC),
+			expectedError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run("TestCalculate", func(t *testing.T) {
+			actual := datetime.Calculate(tt.year)
+			assert.Equal(t, tt.expected, actual)
+		})
+	}
+}
+
 func TestGetMonday(t *testing.T) {
 	tests := []struct {
 		year     int

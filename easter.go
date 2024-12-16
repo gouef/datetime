@@ -6,10 +6,7 @@ import (
 )
 
 func GetEaster(year int) time.Time {
-	easter, err := calculate(year)
-	if err != nil {
-		return time.Time{}
-	}
+	easter, _ := calculate(year)
 	return easter
 }
 
@@ -37,7 +34,7 @@ func calculate(year int) (time.Time, error) {
 	case s2 > 25:
 		easterSunday = GetDate(year, 4, s2-7)
 	default:
-		return time.Time{}, fmt.Errorf("Error calculating Easter Sunday for Year %d", year)
+		return time.Time{}, fmt.Errorf("error calculating Easter Sunday for Year %d", year)
 	}
 
 	return easterSunday, nil

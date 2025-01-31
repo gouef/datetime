@@ -1,34 +1,103 @@
 package datetime
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gouef/utils"
+	"github.com/gouef/validator"
+	"github.com/gouef/validator/constraints"
+	"regexp"
+	"strconv"
 	"time"
+)
+
+const (
+	dateRegexp = `^\(d{4})-(\d{2})-(\d{2})( \d{2}:\d{2}:\d{2})?$`
 )
 
 type Date struct {
 	Year     int
 	Month    int `validate:"min=1,max=12"`
 	Day      int `validate:"min=1,max=31"`
+	Hour     int `validate:"min=0,max=23"`
+	Minute   int `validate:"min=0,max=59"`
+	Second   int `validate:"min=0,max=59"`
 	DateTime time.Time
 }
 
-func NewDate(year int, month int, day int) (*Date, error) {
-	if month < 1 || month > 12 {
-		return nil, fmt.Errorf("invalid month: %d", month)
+func NewDate(year, month, day int) (*Date, error) {
+	return NewDateTime(year, month, day, 0, 0, 0)
+}
+
+func NewDateTime(year, month, day, hour, minute, second int) (*Date, error) {
+	errs := validator.Validate(year, constraints.GreaterOrEqual{Value: 0})
+
+	if len(errs) > 0 {
+		return nil, errors.New(fmt.Sprintf("year must be 0 or greater get \"%d\"", year))
 	}
 
+	errs = validator.Validate(month, constraints.Range{Min: 1, Max: 12})
+
+	if len(errs) > 0 {
+		return nil, errors.New(fmt.Sprintf("month must be between 1-12 get \"%d\"", month))
+	}
 	daysInMonth := DaysInMonth(year, month)
-	if day < 1 || day > daysInMonth {
-		return nil, fmt.Errorf("invalid day: %d for month %d", day, month)
+	errs = validator.Validate(day, constraints.Range{Min: 1, Max: float64(daysInMonth)})
+
+	if len(errs) > 0 {
+		return nil, errors.New(fmt.Sprintf("day must be between 1-%d for month %d of year %d get \"%d\"", daysInMonth, month, year, day))
+	}
+
+	errs = validator.Validate(hour, constraints.Range{Min: 0, Max: 23})
+
+	if len(errs) > 0 {
+		return nil, errors.New(fmt.Sprintf("hour must be between 0-23 get \"%d\"", hour))
+	}
+
+	errs = validator.Validate(minute, constraints.Range{Min: 0, Max: 59})
+
+	if len(errs) > 0 {
+		return nil, errors.New(fmt.Sprintf("minute must be between 0-59 get \"%d\"", minute))
+	}
+
+	errs = validator.Validate(second, constraints.Range{Min: 0, Max: 59})
+
+	if len(errs) > 0 {
+		return nil, errors.New(fmt.Sprintf("second must be between 0-59 get \"%d\"", second))
 	}
 
 	return &Date{
 		Year:     year,
 		Month:    month,
 		Day:      day,
-		DateTime: GetDate(year, month, day),
+		Hour:     hour,
+		Minute:   minute,
+		Second:   second,
+		DateTime: time.Date(year, time.Month(month), day, hour, minute, second, 0, time.UTC),
 	}, nil
+}
+
+func DateFromString(value string) (*Date, error) {
+	errs := validator.Validate(value, constraints.RegularExpression{Regexp: dateRegexp})
+
+	if len(errs) != 0 {
+		return nil, errors.New(fmt.Sprintf("unsupported format of date range \"%s\"", value))
+	}
+
+	re := regexp.MustCompile(dateRegexp)
+	match := re.FindStringSubmatch(value)
+	year, err1 := strconv.Atoi(match[1])
+	month, err2 := strconv.Atoi(match[2])
+	day, err3 := strconv.Atoi(match[3])
+	hour, err4 := strconv.Atoi(match[4])
+	minute, err5 := strconv.Atoi(match[5])
+	second, err6 := strconv.Atoi(match[6])
+
+	if err1 != nil || err2 != nil || err3 != nil || err4 != nil || err5 != nil || err6 != nil {
+		return nil, fmt.Errorf("failed to parse date components from \"%s\"", value)
+	}
+
+	return NewDateTime(year, month, day, hour, minute, second)
 }
 
 func GetDate(year int, month int, day int) time.Time {

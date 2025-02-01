@@ -1,8 +1,6 @@
 name: Format Documentation
 
 on:
-  schedule:
-    - cron: '0 * * * *'
   push:
   workflow_dispatch:
 

@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	dateRegexp = `^\(d{4})-(\d{2})-(\d{2})( \d{2}:\d{2}:\d{2})?$`
+	dateRegexp = `^(\d{4})-(\d{2})-(\d{2})( (\d{2}):(\d{2}):(\d{2}))?$`
 )
 
 type Date struct {
@@ -81,23 +81,23 @@ func DateFromString(value string) (*Date, error) {
 	errs := validator.Validate(value, constraints.RegularExpression{Regexp: dateRegexp})
 
 	if len(errs) != 0 {
-		return nil, errors.New(fmt.Sprintf("unsupported format of date range \"%s\"", value))
+		return nil, errors.New(fmt.Sprintf("unsupported format of date \"%s\"", value))
 	}
 
 	re := regexp.MustCompile(dateRegexp)
 	match := re.FindStringSubmatch(value)
-	year, err1 := strconv.Atoi(match[1])
-	month, err2 := strconv.Atoi(match[2])
-	day, err3 := strconv.Atoi(match[3])
-	hour, err4 := strconv.Atoi(match[4])
-	minute, err5 := strconv.Atoi(match[5])
-	second, err6 := strconv.Atoi(match[6])
+	year, _ := strconv.Atoi(match[1])
+	month, _ := strconv.Atoi(match[2])
+	day, _ := strconv.Atoi(match[3])
 
-	if err1 != nil || err2 != nil || err3 != nil || err4 != nil || err5 != nil || err6 != nil {
-		return nil, fmt.Errorf("failed to parse date components from \"%s\"", value)
+	if match[4] != "" {
+		hour, _ := strconv.Atoi(match[5])
+		minute, _ := strconv.Atoi(match[6])
+		second, _ := strconv.Atoi(match[7])
+
+		return NewDateTime(year, month, day, hour, minute, second)
 	}
-
-	return NewDateTime(year, month, day, hour, minute, second)
+	return NewDate(year, month, day)
 }
 
 func GetDate(year int, month int, day int) time.Time {

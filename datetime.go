@@ -100,7 +100,7 @@ func DateFromString(value string) (*Date, error) {
 	return NewDate(year, month, day)
 }
 
-func GetDate(year int, month int, day int) time.Time {
+func GetDate(year, month, day int) time.Time {
 	return time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
 }
 
@@ -115,12 +115,16 @@ func (d *Date) Time() time.Time {
 
 // Compare compares the date instant d with u. If d is before u, it returns -1;
 // if d is after u, it returns +1; if they're the same, it returns 0.
-func (d Date) Compare(u Date) int {
+func (d *Date) Compare(u *Date) int {
 	return d.Time().Compare(u.Time())
 }
 
-func (d Date) Equal(u Date) bool {
+func (d *Date) Equal(u *Date) bool {
 	return d.Time().Equal(u.Time())
+}
+
+func (d *Date) Between(start, end *Date) bool {
+	return d.Time().Before(end.Time()) && d.Time().After(start.Time())
 }
 
 func DaysInMonthList(year int, month int) []int {

@@ -1,9 +1,11 @@
 name: Notify Discord on New Release
 
 on:
-  push:
-    tags:
-      - '*'
+  workflow_run:
+    workflows:
+      - Create Release
+    types:
+      - completed
 
 jobs:
   notify-discord:

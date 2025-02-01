@@ -54,16 +54,16 @@ func TestIsWeekend(t *testing.T) {
 
 func TestCompare(t *testing.T) {
 	tests := []struct {
-		date1    datetime.Date
-		date2    datetime.Date
+		date1    *datetime.Date
+		date2    *datetime.Date
 		expected int
 	}{
-		{datetime.Date{Year: 2024, Month: 12, Day: 25, DateTime: time.Date(2024, 12, 25, 0, 0, 0, 0, time.UTC)},
-			datetime.Date{Year: 2024, Month: 12, Day: 25, DateTime: time.Date(2024, 12, 25, 0, 0, 0, 0, time.UTC)}, 0},
-		{datetime.Date{Year: 2024, Month: 12, Day: 25, DateTime: time.Date(2024, 12, 25, 0, 0, 0, 0, time.UTC)},
-			datetime.Date{Year: 2024, Month: 12, Day: 26, DateTime: time.Date(2024, 12, 26, 0, 0, 0, 0, time.UTC)}, -1}, // 25th < 26th
-		{datetime.Date{Year: 2024, Month: 12, Day: 26, DateTime: time.Date(2024, 12, 26, 0, 0, 0, 0, time.UTC)},
-			datetime.Date{Year: 2024, Month: 12, Day: 25, DateTime: time.Date(2024, 12, 25, 0, 0, 0, 0, time.UTC)}, 1}, // 26th > 25th
+		{&datetime.Date{Year: 2024, Month: 12, Day: 25, DateTime: time.Date(2024, 12, 25, 0, 0, 0, 0, time.UTC)},
+			&datetime.Date{Year: 2024, Month: 12, Day: 25, DateTime: time.Date(2024, 12, 25, 0, 0, 0, 0, time.UTC)}, 0},
+		{&datetime.Date{Year: 2024, Month: 12, Day: 25, DateTime: time.Date(2024, 12, 25, 0, 0, 0, 0, time.UTC)},
+			&datetime.Date{Year: 2024, Month: 12, Day: 26, DateTime: time.Date(2024, 12, 26, 0, 0, 0, 0, time.UTC)}, -1}, // 25th < 26th
+		{&datetime.Date{Year: 2024, Month: 12, Day: 26, DateTime: time.Date(2024, 12, 26, 0, 0, 0, 0, time.UTC)},
+			&datetime.Date{Year: 2024, Month: 12, Day: 25, DateTime: time.Date(2024, 12, 25, 0, 0, 0, 0, time.UTC)}, 1}, // 26th > 25th
 	}
 
 	for _, tt := range tests {
@@ -75,32 +75,32 @@ func TestCompare(t *testing.T) {
 
 func TestDateEqual(t *testing.T) {
 	tests := []struct {
-		date1    datetime.Date
-		date2    datetime.Date
+		date1    *datetime.Date
+		date2    *datetime.Date
 		expected bool
 	}{
 		// Test 1: Equal Date instances
 		{
-			date1:    datetime.Date{Year: 2024, Month: 3, Day: 31},
-			date2:    datetime.Date{Year: 2024, Month: 3, Day: 31},
+			date1:    &datetime.Date{Year: 2024, Month: 3, Day: 31},
+			date2:    &datetime.Date{Year: 2024, Month: 3, Day: 31},
 			expected: true,
 		},
 		// Test 2: Different Date instances (different day)
 		{
-			date1:    datetime.Date{Year: 2024, Month: 3, Day: 31},
-			date2:    datetime.Date{Year: 2024, Month: 3, Day: 30},
+			date1:    &datetime.Date{Year: 2024, Month: 3, Day: 31},
+			date2:    &datetime.Date{Year: 2024, Month: 3, Day: 30},
 			expected: false,
 		},
 		// Test 3: Different Date instances (different month)
 		{
-			date1:    datetime.Date{Year: 2024, Month: 3, Day: 31},
-			date2:    datetime.Date{Year: 2024, Month: 4, Day: 1},
+			date1:    &datetime.Date{Year: 2024, Month: 3, Day: 31},
+			date2:    &datetime.Date{Year: 2024, Month: 4, Day: 1},
 			expected: false,
 		},
 		// Test 4: Different Date instances (different year)
 		{
-			date1:    datetime.Date{Year: 2024, Month: 3, Day: 31},
-			date2:    datetime.Date{Year: 2025, Month: 3, Day: 31},
+			date1:    &datetime.Date{Year: 2024, Month: 3, Day: 31},
+			date2:    &datetime.Date{Year: 2025, Month: 3, Day: 31},
 			expected: false,
 		},
 	}

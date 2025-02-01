@@ -16,9 +16,10 @@ func TestNewDate(t *testing.T) {
 		err      bool
 	}{
 		{2024, 12, 25, &datetime.Date{Year: 2024, Month: 12, Day: 25, DateTime: time.Date(2024, 12, 25, 0, 0, 0, 0, time.UTC)}, false},
-		{2024, 2, 30, nil, true},  // Invalid day for February
-		{2024, 13, 10, nil, true}, // Invalid month (13)
-		{2024, 4, 31, nil, true},  // April has only 30 days
+		{2024, 2, 30, nil, true},   // Invalid day for February
+		{2024, 13, 10, nil, true},  // Invalid month (13)
+		{2024, 4, 31, nil, true},   // April has only 30 days
+		{-2024, 12, 25, nil, true}, // April has only 30 days
 	}
 
 	for _, tt := range tests {
@@ -161,6 +162,39 @@ func TestDaysInMonthByDate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run("TestDaysInMonthByDate", func(t *testing.T) {
 			assert.Equal(t, tt.expected, datetime.DaysInMonthByDate(tt.date))
+		})
+	}
+}
+
+func TestDateFromString(t *testing.T) {
+	validDate, _ := datetime.NewDate(2025, 1, 31)
+	validDateTime, _ := datetime.NewDateTime(2025, 1, 31, 23, 27, 15)
+	tests := []struct {
+		date         string
+		expectedErr  bool
+		expectedDate *datetime.Date
+	}{
+		{"2025-01-31", false, validDate},
+		{"2025-01-31 23:27:15", false, validDateTime},
+		{"2025-02-31", true, nil},
+		{"2025-13-32", true, nil},
+		{"2025-01-31 24:27:15", true, nil},
+		{"2025-01-31 23:65:15", true, nil},
+		{"2025-01-31 23:27:95", true, nil},
+		{"-2025-01-31 23:27:15", true, nil},
+		{"invalid", true, nil},
+	}
+
+	for _, tt := range tests {
+		t.Run("TestDaysInMonthByDate", func(t *testing.T) {
+			date, err := datetime.DateFromString(tt.date)
+			if tt.expectedErr {
+				assert.Nil(t, date)
+				assert.Error(t, err)
+			} else {
+				assert.Nil(t, err)
+				assert.Equal(t, tt.expectedDate, date)
+			}
 		})
 	}
 }

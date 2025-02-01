@@ -149,6 +149,29 @@ func TestDaysInMonth(t *testing.T) {
 	}
 }
 
+func TestBetween(t *testing.T) {
+	date1, _ := datetime.NewDate(2025, 2, 1)
+	date2, _ := datetime.NewDate(2024, 2, 1)
+	date3, _ := datetime.NewDate(2026, 2, 1)
+
+	tests := []struct {
+		date     *datetime.Date
+		start    *datetime.Date
+		end      *datetime.Date
+		expected bool
+	}{
+		{date1, date2, date3, true},
+		{date2, date1, date3, false},
+		{date3, date2, date3, false},
+	}
+
+	for _, tt := range tests {
+		t.Run("TestDaysInMonth", func(t *testing.T) {
+			assert.Equal(t, tt.expected, tt.date.Between(tt.start, tt.end))
+		})
+	}
+}
+
 func TestDaysInMonthByDate(t *testing.T) {
 	tests := []struct {
 		date     time.Time

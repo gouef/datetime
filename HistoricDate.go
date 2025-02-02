@@ -9,5 +9,5 @@ var (
 
 type HistoricDate struct {
 	historic Historic
-	date     Date
+	date     DateTime
 }

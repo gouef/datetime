@@ -12,10 +12,10 @@ import (
 )
 
 const (
-	dateRegexp = `^(\d{4})-(\d{2})-(\d{2})( (\d{2}):(\d{2}):(\d{2}))?$`
+	dateTimeRegexp = `^(\d{4})-(\d{2})-(\d{2})( (\d{2}):(\d{2}):(\d{2}))?$`
 )
 
-type Date struct {
+type DateTime struct {
 	Year     int
 	Month    int `validate:"min=1,max=12"`
 	Day      int `validate:"min=1,max=31"`
@@ -25,11 +25,21 @@ type Date struct {
 	DateTime time.Time
 }
 
-func NewDate(year, month, day int) (*Date, error) {
-	return NewDateTime(year, month, day, 0, 0, 0)
+func Now() *DateTime {
+	now := time.Now()
+
+	return &DateTime{
+		Year:     now.Year(),
+		Month:    int(now.Month()),
+		Day:      now.Day(),
+		Hour:     now.Hour(),
+		Minute:   now.Minute(),
+		Second:   now.Second(),
+		DateTime: now,
+	}
 }
 
-func NewDateTime(year, month, day, hour, minute, second int) (*Date, error) {
+func NewDateTime(year, month, day, hour, minute, second int) (*DateTime, error) {
 	errs := validator.Validate(year, constraints.GreaterOrEqual{Value: 0})
 
 	if len(errs) > 0 {
@@ -66,7 +76,7 @@ func NewDateTime(year, month, day, hour, minute, second int) (*Date, error) {
 		return nil, errors.New(fmt.Sprintf("second must be between 0-59 get \"%d\"", second))
 	}
 
-	return &Date{
+	return &DateTime{
 		Year:     year,
 		Month:    month,
 		Day:      day,
@@ -77,14 +87,14 @@ func NewDateTime(year, month, day, hour, minute, second int) (*Date, error) {
 	}, nil
 }
 
-func DateFromString(value string) (*Date, error) {
-	errs := validator.Validate(value, constraints.RegularExpression{Regexp: dateRegexp})
+func DateTimeFromString(value string) (*DateTime, error) {
+	errs := validator.Validate(value, constraints.RegularExpression{Regexp: dateTimeRegexp})
 
 	if len(errs) != 0 {
 		return nil, errors.New(fmt.Sprintf("unsupported format of date \"%s\"", value))
 	}
 
-	re := regexp.MustCompile(dateRegexp)
+	re := regexp.MustCompile(dateTimeRegexp)
 	match := re.FindStringSubmatch(value)
 	year, _ := strconv.Atoi(match[1])
 	month, _ := strconv.Atoi(match[2])
@@ -97,33 +107,34 @@ func DateFromString(value string) (*Date, error) {
 
 		return NewDateTime(year, month, day, hour, minute, second)
 	}
-	return NewDate(year, month, day)
+
+	return nil, errors.New(fmt.Sprintf("unsupported format of datetime \"%s\". time is missing.", value))
 }
 
 func GetDate(year, month, day int) time.Time {
 	return time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
 }
 
-func (d *Date) IsWeekend() bool {
+func (d *DateTime) IsWeekend() bool {
 	weekendDays := []time.Weekday{time.Sunday, time.Saturday}
 	return utils.InArray(d.DateTime.Weekday(), weekendDays)
 }
 
-func (d *Date) Time() time.Time {
+func (d *DateTime) Time() time.Time {
 	return time.Date(d.Year, time.Month(d.Month), d.Day, 0, 0, 0, 0, time.UTC)
 }
 
 // Compare compares the date instant d with u. If d is before u, it returns -1;
 // if d is after u, it returns +1; if they're the same, it returns 0.
-func (d *Date) Compare(u *Date) int {
+func (d *DateTime) Compare(u *DateTime) int {
 	return d.Time().Compare(u.Time())
 }
 
-func (d *Date) Equal(u *Date) bool {
+func (d *DateTime) Equal(u *DateTime) bool {
 	return d.Time().Equal(u.Time())
 }
 
-func (d *Date) Between(start, end *Date) bool {
+func (d *DateTime) Between(start, end *DateTime) bool {
 	return d.Time().Before(end.Time()) && d.Time().After(start.Time())
 }
 

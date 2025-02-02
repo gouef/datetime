@@ -14,19 +14,41 @@ const (
 )
 
 type DateRange struct {
-	from  string
-	to    string
+	from  DateValue
+	to    DateValue
 	start RangeStart
 	end   RangeEnd
 }
 
 func NewDateRange(from, to string, start RangeStart, end RangeEnd) *DateRange {
 	return &DateRange{
-		from:  from,
-		to:    to,
+		from:  DateValue(from),
+		to:    DateValue(to),
 		start: start,
 		end:   end,
 	}
+}
+
+func DateRangeFromString(dateRange string) (*DateRange, error) {
+	errs := validator.Validate(dateRange, constraints.RegularExpression{Regexp: dateRangeRegexp})
+
+	if len(errs) != 0 {
+		return nil, errors.New(fmt.Sprintf("unsupported format of date range \"%s\"", dateRange))
+	}
+
+	re := regexp.MustCompile(dateRangeRegexp)
+	match := re.FindStringSubmatch(dateRange)
+	openBracket, date1, date2, closeBracket := match[1], match[2], match[3], match[4]
+
+	return NewDateRange(date1, date2, RangeStart(openBracket), RangeEnd(closeBracket)), nil
+}
+
+func (d *DateRange) Start() RangeStart {
+	return d.start
+}
+
+func (d *DateRange) End() RangeEnd {
+	return d.end
 }
 
 func (d *DateRange) String() string {
@@ -43,20 +65,6 @@ func (d *DateRange) Is(value any) bool {
 	start, _ := DateFromString(string(d.start))
 	end, _ := DateFromString(string(d.end))
 	return date.Between(start, end)
-}
-
-func DateRangeFromString(dateRange string) (*DateRange, error) {
-	errs := validator.Validate(dateRange, constraints.RegularExpression{Regexp: dateRangeRegexp})
-
-	if len(errs) != 0 {
-		return nil, errors.New(fmt.Sprintf("unsupported format of date range \"%s\"", dateRange))
-	}
-
-	re := regexp.MustCompile(dateRangeRegexp)
-	match := re.FindStringSubmatch(dateRange)
-	openBracket, date1, date2, closeBracket := match[1], match[2], match[3], match[4]
-
-	return NewDateRange(date1, date2, RangeStart(openBracket), RangeEnd(closeBracket)), nil
 }
 
 func (d *DateRange) format(date any) (*Date, error) {

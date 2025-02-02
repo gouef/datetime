@@ -37,12 +37,12 @@ func TestNewDate(t *testing.T) {
 
 func TestIsWeekend(t *testing.T) {
 	tests := []struct {
-		date     *datetime.Date
+		date     *datetime.DateTime
 		expected bool
 	}{
-		{&datetime.Date{Year: 2024, Month: 12, Day: 21, DateTime: time.Date(2024, 12, 21, 0, 0, 0, 0, time.UTC)}, true},  // Saturday
-		{&datetime.Date{Year: 2024, Month: 12, Day: 22, DateTime: time.Date(2024, 12, 22, 0, 0, 0, 0, time.UTC)}, true},  // Sunday
-		{&datetime.Date{Year: 2024, Month: 12, Day: 23, DateTime: time.Date(2024, 12, 23, 0, 0, 0, 0, time.UTC)}, false}, // Monday
+		{&datetime.DateTime{Year: 2024, Month: 12, Day: 21, DateTime: time.Date(2024, 12, 21, 0, 0, 0, 0, time.UTC)}, true},  // Saturday
+		{&datetime.DateTime{Year: 2024, Month: 12, Day: 22, DateTime: time.Date(2024, 12, 22, 0, 0, 0, 0, time.UTC)}, true},  // Sunday
+		{&datetime.DateTime{Year: 2024, Month: 12, Day: 23, DateTime: time.Date(2024, 12, 23, 0, 0, 0, 0, time.UTC)}, false}, // Monday
 	}
 
 	for _, tt := range tests {
@@ -54,16 +54,16 @@ func TestIsWeekend(t *testing.T) {
 
 func TestCompare(t *testing.T) {
 	tests := []struct {
-		date1    datetime.Date
-		date2    datetime.Date
+		date1    *datetime.DateTime
+		date2    *datetime.DateTime
 		expected int
 	}{
-		{datetime.Date{Year: 2024, Month: 12, Day: 25, DateTime: time.Date(2024, 12, 25, 0, 0, 0, 0, time.UTC)},
-			datetime.Date{Year: 2024, Month: 12, Day: 25, DateTime: time.Date(2024, 12, 25, 0, 0, 0, 0, time.UTC)}, 0},
-		{datetime.Date{Year: 2024, Month: 12, Day: 25, DateTime: time.Date(2024, 12, 25, 0, 0, 0, 0, time.UTC)},
-			datetime.Date{Year: 2024, Month: 12, Day: 26, DateTime: time.Date(2024, 12, 26, 0, 0, 0, 0, time.UTC)}, -1}, // 25th < 26th
-		{datetime.Date{Year: 2024, Month: 12, Day: 26, DateTime: time.Date(2024, 12, 26, 0, 0, 0, 0, time.UTC)},
-			datetime.Date{Year: 2024, Month: 12, Day: 25, DateTime: time.Date(2024, 12, 25, 0, 0, 0, 0, time.UTC)}, 1}, // 26th > 25th
+		{&datetime.DateTime{Year: 2024, Month: 12, Day: 25, DateTime: time.Date(2024, 12, 25, 0, 0, 0, 0, time.UTC)},
+			&datetime.DateTime{Year: 2024, Month: 12, Day: 25, DateTime: time.Date(2024, 12, 25, 0, 0, 0, 0, time.UTC)}, 0},
+		{&datetime.DateTime{Year: 2024, Month: 12, Day: 25, DateTime: time.Date(2024, 12, 25, 0, 0, 0, 0, time.UTC)},
+			&datetime.DateTime{Year: 2024, Month: 12, Day: 26, DateTime: time.Date(2024, 12, 26, 0, 0, 0, 0, time.UTC)}, -1}, // 25th < 26th
+		{&datetime.DateTime{Year: 2024, Month: 12, Day: 26, DateTime: time.Date(2024, 12, 26, 0, 0, 0, 0, time.UTC)},
+			&datetime.DateTime{Year: 2024, Month: 12, Day: 25, DateTime: time.Date(2024, 12, 25, 0, 0, 0, 0, time.UTC)}, 1}, // 26th > 25th
 	}
 
 	for _, tt := range tests {
@@ -75,32 +75,32 @@ func TestCompare(t *testing.T) {
 
 func TestDateEqual(t *testing.T) {
 	tests := []struct {
-		date1    datetime.Date
-		date2    datetime.Date
+		date1    *datetime.DateTime
+		date2    *datetime.DateTime
 		expected bool
 	}{
-		// Test 1: Equal Date instances
+		// Test 1: Equal DateTime instances
 		{
-			date1:    datetime.Date{Year: 2024, Month: 3, Day: 31},
-			date2:    datetime.Date{Year: 2024, Month: 3, Day: 31},
+			date1:    &datetime.DateTime{Year: 2024, Month: 3, Day: 31},
+			date2:    &datetime.DateTime{Year: 2024, Month: 3, Day: 31},
 			expected: true,
 		},
-		// Test 2: Different Date instances (different day)
+		// Test 2: Different DateTime instances (different day)
 		{
-			date1:    datetime.Date{Year: 2024, Month: 3, Day: 31},
-			date2:    datetime.Date{Year: 2024, Month: 3, Day: 30},
+			date1:    &datetime.DateTime{Year: 2024, Month: 3, Day: 31},
+			date2:    &datetime.DateTime{Year: 2024, Month: 3, Day: 30},
 			expected: false,
 		},
-		// Test 3: Different Date instances (different month)
+		// Test 3: Different DateTime instances (different month)
 		{
-			date1:    datetime.Date{Year: 2024, Month: 3, Day: 31},
-			date2:    datetime.Date{Year: 2024, Month: 4, Day: 1},
+			date1:    &datetime.DateTime{Year: 2024, Month: 3, Day: 31},
+			date2:    &datetime.DateTime{Year: 2024, Month: 4, Day: 1},
 			expected: false,
 		},
-		// Test 4: Different Date instances (different year)
+		// Test 4: Different DateTime instances (different year)
 		{
-			date1:    datetime.Date{Year: 2024, Month: 3, Day: 31},
-			date2:    datetime.Date{Year: 2025, Month: 3, Day: 31},
+			date1:    &datetime.DateTime{Year: 2024, Month: 3, Day: 31},
+			date2:    &datetime.DateTime{Year: 2025, Month: 3, Day: 31},
 			expected: false,
 		},
 	}
@@ -149,6 +149,29 @@ func TestDaysInMonth(t *testing.T) {
 	}
 }
 
+func TestBetween(t *testing.T) {
+	date1, _ := datetime.NewDate(2025, 2, 1)
+	date2, _ := datetime.NewDate(2024, 2, 1)
+	date3, _ := datetime.NewDate(2026, 2, 1)
+
+	tests := []struct {
+		date     *datetime.Date
+		start    *datetime.Date
+		end      *datetime.Date
+		expected bool
+	}{
+		{date1, date2, date3, true},
+		{date2, date1, date3, false},
+		{date3, date2, date3, false},
+	}
+
+	for _, tt := range tests {
+		t.Run("TestDaysInMonth", func(t *testing.T) {
+			assert.Equal(t, tt.expected, tt.date.Between(tt.start, tt.end))
+		})
+	}
+}
+
 func TestDaysInMonthByDate(t *testing.T) {
 	tests := []struct {
 		date     time.Time
@@ -168,20 +191,16 @@ func TestDaysInMonthByDate(t *testing.T) {
 
 func TestDateFromString(t *testing.T) {
 	validDate, _ := datetime.NewDate(2025, 1, 31)
-	validDateTime, _ := datetime.NewDateTime(2025, 1, 31, 23, 27, 15)
 	tests := []struct {
 		date         string
 		expectedErr  bool
 		expectedDate *datetime.Date
 	}{
 		{"2025-01-31", false, validDate},
-		{"2025-01-31 23:27:15", false, validDateTime},
+		{"2025-01-31 23:27:15", false, validDate},
 		{"2025-02-31", true, nil},
 		{"2025-13-32", true, nil},
-		{"2025-01-31 24:27:15", true, nil},
-		{"2025-01-31 23:65:15", true, nil},
-		{"2025-01-31 23:27:95", true, nil},
-		{"-2025-01-31 23:27:15", true, nil},
+		{"-2025-01-31", true, nil},
 		{"invalid", true, nil},
 	}
 

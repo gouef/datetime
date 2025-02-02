@@ -1,8 +1,9 @@
-package datetime
+package date
 
 import (
 	"errors"
 	"fmt"
+	"github.com/gouef/datetime"
 	"github.com/gouef/utils"
 	"github.com/gouef/validator"
 	"github.com/gouef/validator/constraints"
@@ -12,7 +13,8 @@ import (
 )
 
 const (
-	dateRegexp = `^(\d{4})-(\d{2})-(\d{2})?$`
+	Regexp         = `^(\d{4})-(\d{2})-(\d{2})?$`
+	DateTimeRegexp = `^(((\d{4})-(\d{2})-(\d{2}))( ))((\d{2}):(\d{2}):(\d{2}))?$`
 )
 
 type Date struct {
@@ -22,7 +24,7 @@ type Date struct {
 	DateTime time.Time
 }
 
-func NewDate(year, month, day int) (*Date, error) {
+func New(year, month, day int) (datetime.Interface, error) {
 	errs := validator.Validate(year, constraints.GreaterOrEqual{Value: 0})
 
 	if len(errs) > 0 {
@@ -34,7 +36,7 @@ func NewDate(year, month, day int) (*Date, error) {
 	if len(errs) > 0 {
 		return nil, errors.New(fmt.Sprintf("month must be between 1-12 get \"%d\"", month))
 	}
-	daysInMonth := DaysInMonth(year, month)
+	daysInMonth := datetime.DaysInMonth(year, month)
 	errs = validator.Validate(day, constraints.Range{Min: 1, Max: float64(daysInMonth)})
 
 	if len(errs) > 0 {
@@ -49,20 +51,28 @@ func NewDate(year, month, day int) (*Date, error) {
 	}, nil
 }
 
-func DateFromString(value string) (*Date, error) {
-	errs := validator.Validate(value, constraints.RegularExpression{Regexp: dateTimeRegexp})
+func FromString(value string) (datetime.Interface, error) {
+	errs := validator.Validate(value, constraints.RegularExpression{Regexp: DateTimeRegexp})
 
 	if len(errs) != 0 {
 		return nil, errors.New(fmt.Sprintf("unsupported format of date \"%s\"", value))
 	}
 
-	re := regexp.MustCompile(dateTimeRegexp)
+	re := regexp.MustCompile(DateTimeRegexp)
 	match := re.FindStringSubmatch(value)
 	year, _ := strconv.Atoi(match[1])
 	month, _ := strconv.Atoi(match[2])
 	day, _ := strconv.Atoi(match[3])
 
-	return NewDate(year, month, day)
+	return New(year, month, day)
+}
+
+func (d *Date) FromString(value string) (datetime.Interface, error) {
+	return FromString(value)
+}
+
+func (d *Date) ToString() string {
+	return d.Time().Format(time.DateOnly)
 }
 
 func (d *Date) IsWeekend() bool {
@@ -76,14 +86,14 @@ func (d *Date) Time() time.Time {
 
 // Compare compares the date instant d with u. If d is before u, it returns -1;
 // if d is after u, it returns +1; if they're the same, it returns 0.
-func (d *Date) Compare(u *Date) int {
+func (d *Date) Compare(u datetime.Interface) int {
 	return d.Time().Compare(u.Time())
 }
 
-func (d *Date) Equal(u *Date) bool {
+func (d *Date) Equal(u datetime.Interface) bool {
 	return d.Time().Equal(u.Time())
 }
 
-func (d *Date) Between(start, end *Date) bool {
+func (d *Date) Between(start, end datetime.Interface) bool {
 	return d.Time().Before(end.Time()) && d.Time().After(start.Time())
 }

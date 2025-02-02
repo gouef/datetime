@@ -8,6 +8,11 @@ require (
 	github.com/stretchr/testify v1.10.0
 )
 
+replace (
+	github.com/gouef/datetime/date => ./date
+	github.com/gouef/datetime/time => ./time
+)
+
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gouef/country v1.0.2 // indirect

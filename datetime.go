@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	dateTimeRegexp = `^(\d{4})-(\d{2})-(\d{2})( (\d{2}):(\d{2}):(\d{2}))?$`
+	Regexp = `^(\d{4})-(\d{2})-(\d{2})( (\d{2}):(\d{2}):(\d{2}))?$`
 )
 
 type DateTime struct {
@@ -39,7 +39,7 @@ func Now() *DateTime {
 	}
 }
 
-func NewDateTime(year, month, day, hour, minute, second int) (*DateTime, error) {
+func New(year, month, day, hour, minute, second int) (*DateTime, error) {
 	errs := validator.Validate(year, constraints.GreaterOrEqual{Value: 0})
 
 	if len(errs) > 0 {
@@ -87,14 +87,14 @@ func NewDateTime(year, month, day, hour, minute, second int) (*DateTime, error) 
 	}, nil
 }
 
-func DateTimeFromString(value string) (*DateTime, error) {
-	errs := validator.Validate(value, constraints.RegularExpression{Regexp: dateTimeRegexp})
+func FromString(value string) (Interface, error) {
+	errs := validator.Validate(value, constraints.RegularExpression{Regexp: Regexp})
 
 	if len(errs) != 0 {
 		return nil, errors.New(fmt.Sprintf("unsupported format of date \"%s\"", value))
 	}
 
-	re := regexp.MustCompile(dateTimeRegexp)
+	re := regexp.MustCompile(Regexp)
 	match := re.FindStringSubmatch(value)
 	year, _ := strconv.Atoi(match[1])
 	month, _ := strconv.Atoi(match[2])
@@ -105,10 +105,18 @@ func DateTimeFromString(value string) (*DateTime, error) {
 		minute, _ := strconv.Atoi(match[6])
 		second, _ := strconv.Atoi(match[7])
 
-		return NewDateTime(year, month, day, hour, minute, second)
+		return New(year, month, day, hour, minute, second)
 	}
 
 	return nil, errors.New(fmt.Sprintf("unsupported format of datetime \"%s\". time is missing.", value))
+}
+
+func (d *DateTime) FromString(value string) (Interface, error) {
+	return FromString(value)
+}
+
+func (d *DateTime) ToString() string {
+	return d.Time().Format(time.DateTime)
 }
 
 func GetDate(year, month, day int) time.Time {
@@ -121,20 +129,20 @@ func (d *DateTime) IsWeekend() bool {
 }
 
 func (d *DateTime) Time() time.Time {
-	return time.Date(d.Year, time.Month(d.Month), d.Day, 0, 0, 0, 0, time.UTC)
+	return time.Date(d.Year, time.Month(d.Month), d.Day, d.Hour, d.Minute, d.Second, 0, time.UTC)
 }
 
 // Compare compares the date instant d with u. If d is before u, it returns -1;
 // if d is after u, it returns +1; if they're the same, it returns 0.
-func (d *DateTime) Compare(u *DateTime) int {
+func (d *DateTime) Compare(u Interface) int {
 	return d.Time().Compare(u.Time())
 }
 
-func (d *DateTime) Equal(u *DateTime) bool {
+func (d *DateTime) Equal(u Interface) bool {
 	return d.Time().Equal(u.Time())
 }
 
-func (d *DateTime) Between(start, end *DateTime) bool {
+func (d *DateTime) Between(start, end Interface) bool {
 	return d.Time().Before(end.Time()) && d.Time().After(start.Time())
 }
 

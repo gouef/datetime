@@ -2,37 +2,46 @@ package tests
 
 import (
 	"github.com/gouef/datetime"
+	"github.com/gouef/datetime/date"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 )
 
-func TestNewDate(t *testing.T) {
+func TestNewDateTime(t *testing.T) {
 	tests := []struct {
 		year     int
 		month    int
 		day      int
-		expected *datetime.Date
+		hour     int
+		minute   int
+		second   int
+		expected *datetime.DateTime
 		err      bool
 	}{
-		{2024, 12, 25, &datetime.Date{Year: 2024, Month: 12, Day: 25, DateTime: time.Date(2024, 12, 25, 0, 0, 0, 0, time.UTC)}, false},
-		{2024, 2, 30, nil, true},   // Invalid day for February
-		{2024, 13, 10, nil, true},  // Invalid month (13)
-		{2024, 4, 31, nil, true},   // April has only 30 days
-		{-2024, 12, 25, nil, true}, // April has only 30 days
+		{2024, 12, 25, 0, 0, 0, &datetime.DateTime{Year: 2024, Month: 12, Day: 25, DateTime: time.Date(2024, 12, 25, 0, 0, 0, 0, time.UTC)}, false},
+		{2024, 2, 30, 0, 0, 0, nil, true},   // Invalid day for February
+		{2024, 13, 10, 0, 0, 0, nil, true},  // Invalid month (13)
+		{2024, 4, 31, 0, 0, 0, nil, true},   // April has only 30 days
+		{-2024, 12, 25, 0, 0, 0, nil, true}, // April has only 30 days
 	}
 
 	for _, tt := range tests {
 		t.Run("TestNewDate", func(t *testing.T) {
-			date, err := datetime.NewDate(tt.year, tt.month, tt.day)
+			d, err := datetime.New(tt.year, tt.month, tt.day, tt.hour, tt.minute, tt.second)
 			if tt.err {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.expected, date)
+				assert.Equal(t, tt.expected, d)
 			}
 		})
 	}
+
+	t.Run("Test Now", func(t *testing.T) {
+		d := datetime.Now()
+		assert.NotNil(t, d)
+	})
 }
 
 func TestIsWeekend(t *testing.T) {
@@ -73,7 +82,7 @@ func TestCompare(t *testing.T) {
 	}
 }
 
-func TestDateEqual(t *testing.T) {
+func TestDateTimeEqual(t *testing.T) {
 	tests := []struct {
 		date1    *datetime.DateTime
 		date2    *datetime.DateTime
@@ -150,14 +159,14 @@ func TestDaysInMonth(t *testing.T) {
 }
 
 func TestBetween(t *testing.T) {
-	date1, _ := datetime.NewDate(2025, 2, 1)
-	date2, _ := datetime.NewDate(2024, 2, 1)
-	date3, _ := datetime.NewDate(2026, 2, 1)
+	date1, _ := date.New(2025, 2, 1)
+	date2, _ := date.New(2024, 2, 1)
+	date3, _ := date.New(2026, 2, 1)
 
 	tests := []struct {
-		date     *datetime.Date
-		start    *datetime.Date
-		end      *datetime.Date
+		date     datetime.Interface
+		start    datetime.Interface
+		end      datetime.Interface
 		expected bool
 	}{
 		{date1, date2, date3, true},
@@ -189,30 +198,34 @@ func TestDaysInMonthByDate(t *testing.T) {
 	}
 }
 
-func TestDateFromString(t *testing.T) {
-	validDate, _ := datetime.NewDate(2025, 1, 31)
+func TestDateTimeFromString(t *testing.T) {
+	validDate, _ := datetime.New(2025, 1, 31, 23, 27, 15)
 	tests := []struct {
 		date         string
 		expectedErr  bool
-		expectedDate *datetime.Date
+		expectedDate datetime.Interface
 	}{
-		{"2025-01-31", false, validDate},
+		{"2025-01-31", true, nil},
 		{"2025-01-31 23:27:15", false, validDate},
 		{"2025-02-31", true, nil},
 		{"2025-13-32", true, nil},
-		{"-2025-01-31", true, nil},
+		{"-2025-06-31", true, nil},
 		{"invalid", true, nil},
 	}
 
 	for _, tt := range tests {
-		t.Run("TestDaysInMonthByDate", func(t *testing.T) {
-			date, err := datetime.DateFromString(tt.date)
+		t.Run("TestDaysInMonthByDate: "+tt.date, func(t *testing.T) {
+			d, err := datetime.FromString(tt.date)
 			if tt.expectedErr {
-				assert.Nil(t, date)
+				assert.Nil(t, d)
 				assert.Error(t, err)
 			} else {
 				assert.Nil(t, err)
-				assert.Equal(t, tt.expectedDate, date)
+				assert.Equal(t, tt.expectedDate, d)
+
+				d2, err := tt.expectedDate.FromString(tt.date)
+				assert.Nil(t, err)
+				assert.Equal(t, d2, d)
 			}
 		})
 	}

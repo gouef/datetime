@@ -11,13 +11,17 @@ import (
 type Value string
 
 func StringToValue(value string) (Value, error) {
-	errs := validator.Validate(value, constraints.RegularExpression{Regexp: Regexp})
+	errs := validator.Validate(value, constraints.RegularExpression{Regexp: DateTimeRegexp})
 
-	if len(errs) != 0 {
+	d, err := FromString(value)
+
+	if len(errs) != 0 || err != nil {
 		return "", errors.New(fmt.Sprintf("unsupported format of date \"%s\"", value))
 	}
 
-	return Value(value), nil
+	str := d.ToString()
+
+	return Value(str), nil
 }
 
 func (d Value) Date() datetime.Interface {

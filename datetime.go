@@ -129,7 +129,7 @@ func (d *DateTime) IsWeekend() bool {
 }
 
 func (d *DateTime) Time() time.Time {
-	return time.Date(d.Year, time.Month(d.Month), d.Day, 0, 0, 0, 0, time.UTC)
+	return time.Date(d.Year, time.Month(d.Month), d.Day, d.Hour, d.Minute, d.Second, 0, time.UTC)
 }
 
 // Compare compares the date instant d with u. If d is before u, it returns -1;

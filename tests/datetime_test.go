@@ -37,6 +37,11 @@ func TestNewDateTime(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("Test Now", func(t *testing.T) {
+		d := datetime.Now()
+		assert.NotNil(t, d)
+	})
 }
 
 func TestIsWeekend(t *testing.T) {
@@ -217,6 +222,10 @@ func TestDateTimeFromString(t *testing.T) {
 			} else {
 				assert.Nil(t, err)
 				assert.Equal(t, tt.expectedDate, d)
+
+				d2, err := tt.expectedDate.FromString(tt.date)
+				assert.Nil(t, err)
+				assert.Equal(t, d2, d)
 			}
 		})
 	}

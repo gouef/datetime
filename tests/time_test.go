@@ -144,6 +144,10 @@ func TestTimeFromString(t *testing.T) {
 			} else {
 				assert.Nil(t, err)
 				assert.Equal(t, tt.expectedDate, d)
+
+				d2, err := tt.expectedDate.FromString(tt.date)
+				assert.Nil(t, err)
+				assert.Equal(t, d2, d)
 			}
 		})
 	}

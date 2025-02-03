@@ -9,14 +9,18 @@ import (
 
 type Value string
 
-func StringToDateTimeValue(value string) (Value, error) {
+func StringToValue(value string) (Value, error) {
 	errs := validator.Validate(value, constraints.RegularExpression{Regexp: Regexp})
 
-	if len(errs) != 0 {
+	d, err := FromString(value)
+
+	if len(errs) != 0 || err != nil {
 		return "", errors.New(fmt.Sprintf("unsupported format of date time \"%s\"", value))
 	}
 
-	return Value(value), nil
+	str := d.ToString()
+
+	return Value(str), nil
 }
 
 func (d Value) Date() Interface {

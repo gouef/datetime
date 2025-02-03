@@ -8,24 +8,27 @@ import (
 	"time"
 )
 
-func TestNewDate(t *testing.T) {
+func TestNewDateTime(t *testing.T) {
 	tests := []struct {
 		year     int
 		month    int
 		day      int
-		expected *date.Date
+		hour     int
+		minute   int
+		second   int
+		expected *datetime.DateTime
 		err      bool
 	}{
-		{2024, 12, 25, &date.Date{Year: 2024, Month: 12, Day: 25, DateTime: time.Date(2024, 12, 25, 0, 0, 0, 0, time.UTC)}, false},
-		{2024, 2, 30, nil, true},   // Invalid day for February
-		{2024, 13, 10, nil, true},  // Invalid month (13)
-		{2024, 4, 31, nil, true},   // April has only 30 days
-		{-2024, 12, 25, nil, true}, // April has only 30 days
+		{2024, 12, 25, 0, 0, 0, &datetime.DateTime{Year: 2024, Month: 12, Day: 25, DateTime: time.Date(2024, 12, 25, 0, 0, 0, 0, time.UTC)}, false},
+		{2024, 2, 30, 0, 0, 0, nil, true},   // Invalid day for February
+		{2024, 13, 10, 0, 0, 0, nil, true},  // Invalid month (13)
+		{2024, 4, 31, 0, 0, 0, nil, true},   // April has only 30 days
+		{-2024, 12, 25, 0, 0, 0, nil, true}, // April has only 30 days
 	}
 
 	for _, tt := range tests {
 		t.Run("TestNewDate", func(t *testing.T) {
-			d, err := date.New(tt.year, tt.month, tt.day)
+			d, err := datetime.New(tt.year, tt.month, tt.day, tt.hour, tt.minute, tt.second)
 			if tt.err {
 				assert.Error(t, err)
 			} else {
@@ -74,7 +77,7 @@ func TestCompare(t *testing.T) {
 	}
 }
 
-func TestDateEqual(t *testing.T) {
+func TestDateTimeEqual(t *testing.T) {
 	tests := []struct {
 		date1    *datetime.DateTime
 		date2    *datetime.DateTime
@@ -190,7 +193,7 @@ func TestDaysInMonthByDate(t *testing.T) {
 	}
 }
 
-func TestDateFromString(t *testing.T) {
+func TestDateTimeFromString(t *testing.T) {
 	validDate, _ := datetime.New(2025, 1, 31, 23, 27, 15)
 	tests := []struct {
 		date         string

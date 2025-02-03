@@ -14,7 +14,7 @@ import (
 
 const (
 	Regexp         = `^(\d{4})-(\d{2})-(\d{2})?$`
-	DateTimeRegexp = `^(((\d{4})-(\d{2})-(\d{2}))( ))((\d{2}):(\d{2}):(\d{2}))?$`
+	DateTimeRegexp = `^(((\d{4})-(\d{2})-(\d{2}))( )?)((\d{2}):(\d{2}):(\d{2}))?$`
 )
 
 type Date struct {
@@ -60,9 +60,9 @@ func FromString(value string) (datetime.Interface, error) {
 
 	re := regexp.MustCompile(DateTimeRegexp)
 	match := re.FindStringSubmatch(value)
-	year, _ := strconv.Atoi(match[1])
-	month, _ := strconv.Atoi(match[2])
-	day, _ := strconv.Atoi(match[3])
+	year, _ := strconv.Atoi(match[3])
+	month, _ := strconv.Atoi(match[4])
+	day, _ := strconv.Atoi(match[5])
 
 	return New(year, month, day)
 }

@@ -8,5 +8,7 @@ type Interface interface {
 	Time() time.Time
 	Equal(u Interface) bool
 	Between(start, end Interface) bool
+	Before(u Interface) bool
+	After(u Interface) bool
 	Compare(u Interface) int
 }

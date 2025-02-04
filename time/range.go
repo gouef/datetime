@@ -21,13 +21,29 @@ type Range struct {
 	end   datetime.RangeEnd
 }
 
-func NewDateRange(from, to string, start datetime.RangeStart, end datetime.RangeEnd) *Range {
+func NewRange(from, to string, start datetime.RangeStart, end datetime.RangeEnd) *Range {
 	return &Range{
 		from:  Value(from),
 		to:    Value(to),
 		start: start,
 		end:   end,
 	}
+}
+
+func NewRangeOptional(from, to string) *Range {
+	return NewRange(from, to, datetime.RangeStartOptional, datetime.RangeEndOptional)
+}
+
+func NewRangeStrict(from, to string) *Range {
+	return NewRange(from, to, datetime.RangeStartStrict, datetime.RangeEndStrict)
+}
+
+func NewRangeStartStrict(from, to string) *Range {
+	return NewRange(from, to, datetime.RangeStartStrict, datetime.RangeEndOptional)
+}
+
+func NewRangeStartOptional(from, to string) *Range {
+	return NewRange(from, to, datetime.RangeStartOptional, datetime.RangeEndStrict)
 }
 
 func RangeFromString(dateRange string) (*Range, error) {
@@ -41,7 +57,7 @@ func RangeFromString(dateRange string) (*Range, error) {
 	match := re.FindStringSubmatch(dateRange)
 	openBracket, date1, date2, closeBracket := match[1], match[2], match[3], match[4]
 
-	return NewDateRange(date1, date2, datetime.RangeStart(openBracket), datetime.RangeEnd(closeBracket)), nil
+	return NewRange(date1, date2, datetime.RangeStart(openBracket), datetime.RangeEnd(closeBracket)), nil
 }
 
 func (d *Range) Start() datetime.RangeStart {

@@ -13,7 +13,7 @@ import (
 
 const (
 	Regexp         = `^(\d{2}):(\d{2}):(\d{2})?$`
-	DateTimeRegexp = `^(((\d{4})-(\d{2})-(\d{2}))( ))?((\d{2}):(\d{2}):(\d{2}))$`
+	DateTimeRegexp = `^((\d{4})-(\d{2})-(\d{2}))?\s*((0[0-9]|1[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]))$`
 )
 
 type Time struct {
@@ -59,9 +59,9 @@ func FromString(value string) (datetime.Interface, error) {
 
 	re := regexp.MustCompile(DateTimeRegexp)
 	match := re.FindStringSubmatch(value)
-	hour, _ := strconv.Atoi(match[8])
-	minute, _ := strconv.Atoi(match[9])
-	second, _ := strconv.Atoi(match[10])
+	hour, _ := strconv.Atoi(match[6])
+	minute, _ := strconv.Atoi(match[7])
+	second, _ := strconv.Atoi(match[8])
 
 	return New(hour, minute, second)
 }
@@ -89,5 +89,13 @@ func (t *Time) Equal(u datetime.Interface) bool {
 }
 
 func (t *Time) Between(start, end datetime.Interface) bool {
-	return t.Time().Before(end.Time()) && t.Time().After(start.Time())
+	return t.Before(end) && t.After(start)
+}
+
+func (t *Time) Before(u datetime.Interface) bool {
+	return t.Time().Before(u.Time())
+}
+
+func (t *Time) After(u datetime.Interface) bool {
+	return t.Time().After(u.Time())
 }

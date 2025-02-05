@@ -65,8 +65,8 @@ func RangeFromString(value string) (*Range, error) {
 	match := re.FindStringSubmatch(value)
 	start := match[1]
 	from := match[2]
-	to := match[9]
-	end := match[16]
+	to := match[12]
+	end := match[22]
 
 	return NewRange(from, to, RangeStart(start), RangeEnd(end))
 }

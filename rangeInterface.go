@@ -18,14 +18,16 @@ var (
 )
 
 const (
-	YearRegexp   = `(\d+)`
-	MonthRegexp  = `(0[1-9]|1[0-2])`
-	DayRegexp    = `(0[1-9]|[12][0-9]|3[01])`
-	HourRegexp   = `(0[0-9]|1[0-9]|2[0-3])`
-	MinuteRegexp = `[0-5][0-9]`
-	SecondRegexp = `[0-5][0-9]`
-
-	RangeRegexp = `^([\[\(])((` + YearRegexp + `-` + MonthRegexp + `-` + DayRegexp + `) (` + HourRegexp + `:` + MinuteRegexp + `:` + SecondRegexp + `))?\s*,\s*((` + YearRegexp + `-` + MonthRegexp + `-` + DayRegexp + `) (` + HourRegexp + `:` + MinuteRegexp + `:` + SecondRegexp + `))?([\]\)])$`
+	YearRegexp     = `(\d+)`
+	MonthRegexp    = `(0[1-9]|1[0-2])`
+	DayRegexp      = `(0[1-9]|[12][0-9]|3[01])`
+	HourRegexp     = `(0[0-9]|1[0-9]|2[0-3])`
+	MinuteRegexp   = `[0-5][0-9]`
+	SecondRegexp   = `[0-5][0-9]`
+	DateRegexp     = YearRegexp + `-` + MonthRegexp + `-` + DayRegexp
+	TimeRegexp     = `(` + HourRegexp + `):(` + MinuteRegexp + `):(` + SecondRegexp + `)`
+	DateTimeRegexp = `((` + DateRegexp + `) (` + TimeRegexp + `))`
+	RangeRegexp    = `^([\[\(])` + DateTimeRegexp + `?\s*,\s*` + DateTimeRegexp + `?([\]\)])$`
 )
 
 type RangeInterface interface {

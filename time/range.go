@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	RangeRegexp = `^([\[\(])(\d{4}-\d{2}-\d{2})?,(\d{4}-\d{2}-\d{2})?([\]\)])$`
+	RangeRegexp = `^([\[\(])` + DateTimeRegexp + `?\s*,\s*` + DateTimeRegexp + `?([\]\)])$`
 )
 
 type Range struct {
@@ -22,6 +22,35 @@ type Range struct {
 }
 
 func NewRange(from, to string, start datetime.RangeStart, end datetime.RangeEnd) (*Range, error) {
+
+	if from == "" && to == "" {
+		return nil, errors.New("from and to (both) can not be empty")
+	}
+
+	validFrom, err := getTimeFromDateTime(from)
+
+	if err != nil && from != "" {
+		return nil, errors.New(fmt.Sprintf("from (%s) is not valid", from))
+	}
+
+	validTo, err := getTimeFromDateTime(to)
+
+	if err != nil && to != "" {
+		return nil, errors.New(fmt.Sprintf("to (%s) is not valid", to))
+	}
+
+	if validFrom == nil {
+		from = ""
+	} else {
+		from = validFrom.ToString()
+	}
+
+	if validTo == nil {
+		to = ""
+	} else {
+		to = validTo.ToString()
+	}
+
 	return &Range{
 		from:  Value(from),
 		to:    Value(to),
@@ -47,15 +76,15 @@ func NewRangeStartOptional(from, to string) (*Range, error) {
 }
 
 func RangeFromString(dateRange string) (*Range, error) {
-	errs := validator.Validate(dateRange, constraints.RegularExpression{Regexp: datetime.RangeRegexp})
+	errs := validator.Validate(dateRange, constraints.RegularExpression{Regexp: RangeRegexp})
 
 	if len(errs) != 0 {
 		return nil, errors.New(fmt.Sprintf("unsupported format of date range \"%s\"", dateRange))
 	}
 
-	re := regexp.MustCompile(datetime.RangeRegexp)
+	re := regexp.MustCompile(RangeRegexp)
 	match := re.FindStringSubmatch(dateRange)
-	openBracket, date1, date2, closeBracket := match[1], match[7], match[14], match[16]
+	openBracket, date1, date2, closeBracket := match[1], match[7], match[17], match[22]
 
 	if date1 == "" && date2 == "" {
 		return nil, errors.New(fmt.Sprintf("time range from and to can not be both empty \"%s\"", dateRange))
@@ -81,7 +110,7 @@ func (d *Range) To() datetime.ValueInterface {
 }
 
 func (d *Range) String() string {
-	return fmt.Sprintf("%s%s,%s%s", d.start, d.from, d.to, d.end)
+	return fmt.Sprintf("%s%s, %s%s", d.Start(), d.From(), d.To(), d.End())
 }
 
 func (d *Range) Is(value any) bool {
@@ -109,10 +138,14 @@ func (d *Range) Is(value any) bool {
 	return date.Between(from, to)
 }
 
+func getTimeFromDateTime(date string) (datetime.Interface, error) {
+	return FromString(date)
+}
+
 func (d *Range) format(date any) (datetime.Interface, error) {
 	switch i := date.(type) {
 	case time.Time:
-		return New(i.Year(), int(i.Month()), i.Day())
+		return New(i.Hour(), i.Minute(), i.Second())
 	case *Time:
 		return i, nil
 	case Time:

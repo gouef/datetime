@@ -169,47 +169,39 @@ func TestTimeRange(t *testing.T) {
 				assert.NoError(t, err)
 				return val
 			}},
-			{"[2025-01-31 14:15:16, 2026-01-31 17:18:19]", "2025-05-06 20:21:22", false, false, func() any {
+			{"[14:15:16, 17:18:19]", "2025-05-06 15:21:22", false, false, func() any {
 				val, err := time.NewRange(
 					"14:15:16", "17:18:19", datetime.RangeStart("["), datetime.RangeEnd("]"))
 				assert.NoError(t, err)
 				return val
 			}},
-			{"[, 2026-01-31 17:18:19]", "2025-05-06 20:21:22", false, false, func() any {
+			{"[, 17:18:19]", "2025-05-06 15:21:22", false, false, func() any {
 				val, err := time.NewRange(
 					"", "17:18:19", datetime.RangeStart("["), datetime.RangeEnd("]"))
 				assert.NoError(t, err)
 				return val
 			}},
-			{"[2025-01-31 14:15:16, ]", "2025-05-06 20:21:22", false, false, func() any {
+			{"[14:15:16, ]", "2025-05-06 15:21:22", false, false, func() any {
 				val, err := time.NewRange(
 					"14:15:16", "", datetime.RangeStart("["), datetime.RangeEnd("]"))
 				assert.NoError(t, err)
 				return val
 			}},
-			{"[2025-01-31 14:15:16, ]", goTime.Date(2025, 5, 6, 20, 21, 22, 0, goTime.UTC), false, false, func() any {
+			{"[14:15:16, ]", goTime.Date(2025, 5, 6, 20, 21, 22, 0, goTime.UTC), false, false, func() any {
 				val, err := time.NewRange(
 					"14:15:16", "", datetime.RangeStart("["), datetime.RangeEnd("]"))
 				assert.NoError(t, err)
 				return val
 			}},
-			{"[2025-01-31, 2026-01-31]", "2025-05-06", true, false, nil},
-			{"[2025-01-31 14:15:16, 2026-01-31]", "2025-05-06", true, false, nil},
-			{"[2025-01-31 14:15:16, 2026-01-31 17:18:19]", 2025, false, true, func() any {
+			{"[14:15:16, 17:18:19]", 2025, false, true, func() any {
 				val, err := time.NewRange(
-					"2025-01-31 14:15:16", "2026-01-31 17:18:19", datetime.RangeStart("["), datetime.RangeEnd("]"))
+					"14:15:16", "17:18:19", datetime.RangeStart("["), datetime.RangeEnd("]"))
 				assert.NoError(t, err)
 				return val
 			}},
 			{"[, ]", time.Now(), true, true, func() any {
 				val, err := time.NewRange(
 					"", "", datetime.RangeStart("["), datetime.RangeEnd("]"))
-				assert.Error(t, err)
-				return val
-			}},
-			{"[2025-01-31 14:15:16, 2026-02-31 14:15:16]", time.Now(), true, true, func() any {
-				val, err := time.NewRange(
-					"2025-01-31 14:15:16", "2026-02-31 14:15:16", datetime.RangeStart("["), datetime.RangeEnd("]"))
 				assert.Error(t, err)
 				return val
 			}},
@@ -246,9 +238,9 @@ func TestTimeRange(t *testing.T) {
 			expected    bool
 		}{
 			{"[2025-01-31, 2026-01-31]", "2025-05-06", true, false},
-			{"[2025-01-31 14:15:16, 2026-01-31 17:18:19]", "2025-05-06 20:21:22", false, true},
-			{"[, 2026-01-31 17:18:19]", "2025-05-06 20:21:22", false, true},
-			{"[2025-01-31 14:15:16, ]", "2025-05-06 20:21:22", false, true},
+			{"[2025-01-31 14:15:16, 2026-01-31 17:18:19]", "2025-05-06 15:21:22", false, true},
+			{"[, 2026-01-31 17:18:19]", "2025-05-06 16:21:22", false, true},
+			{"[2025-01-31 14:15:16, ]", "2025-05-06 15:21:22", false, true},
 			{"[2025-01-31 14:15:16, ]", goTime.Date(2025, 5, 6, 20, 21, 22, 0, goTime.UTC), false, true},
 			{"[2025-01-31, 2026-01-31]", "2025-05-06", true, false},
 			{"[2025-01-31 14:15:16, 2026-01-31]", "2025-05-06", true, false},

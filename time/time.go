@@ -13,7 +13,10 @@ import (
 
 const (
 	Regexp         = `^(\d{2}):(\d{2}):(\d{2})?$`
-	DateTimeRegexp = `^(((\d+)-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]))\s)?(0[0-9]|1[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$`
+	DateRegexp     = datetime.YearRegexp + `-` + datetime.MonthRegexp + `-` + datetime.DayRegexp
+	TimeRegexp     = `(` + datetime.HourRegexp + `):(` + datetime.MinuteRegexp + `):(` + datetime.SecondRegexp + `)`
+	DateTimeRegexp = `((` + DateRegexp + `)?\s*(` + TimeRegexp + `))`
+	//DateTimeRegexp = `^((` + datetime.DateRegexp + `)?\s*((` + datetime.HourRegexp + `):(` + datetime.MinuteRegexp + `):(` + datetime.SecondRegexp + `)))$`
 )
 
 type Time struct {
@@ -65,14 +68,14 @@ func FromString(value string) (datetime.Interface, error) {
 	errs := validator.Validate(value, constraints.RegularExpression{Regexp: DateTimeRegexp})
 
 	if len(errs) != 0 {
-		return nil, errors.New(fmt.Sprintf("unsupported format of date \"%s\"", value))
+		return nil, errors.New(fmt.Sprintf("unsupported format of time \"%s\"", value))
 	}
 
 	re := regexp.MustCompile(DateTimeRegexp)
 	match := re.FindStringSubmatch(value)
-	hour, _ := strconv.Atoi(match[6])
-	minute, _ := strconv.Atoi(match[7])
-	second, _ := strconv.Atoi(match[8])
+	hour, _ := strconv.Atoi(match[8])
+	minute, _ := strconv.Atoi(match[9])
+	second, _ := strconv.Atoi(match[10])
 
 	return New(hour, minute, second)
 }

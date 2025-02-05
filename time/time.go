@@ -13,7 +13,7 @@ import (
 
 const (
 	Regexp         = `^(\d{2}):(\d{2}):(\d{2})?$`
-	DateTimeRegexp = `^((\d{4})-(\d{2})-(\d{2}))?\s*((0[0-9]|1[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]))$`
+	DateTimeRegexp = `^(((\d+)-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]))\s)?(0[0-9]|1[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$`
 )
 
 type Time struct {
@@ -21,6 +21,17 @@ type Time struct {
 	Minute   int `validate:"min=0,max=59"`
 	Second   int `validate:"min=0,max=59"`
 	DateTime goTime.Time
+}
+
+func Now() *Time {
+	now := goTime.Now()
+
+	return &Time{
+		Hour:     now.Hour(),
+		Minute:   now.Minute(),
+		Second:   now.Second(),
+		DateTime: now,
+	}
 }
 
 func New(hour, minute, second int) (datetime.Interface, error) {

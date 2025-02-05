@@ -107,6 +107,15 @@ func (d *Range) Is(value any) bool {
 
 	from, _ := FromString(string(d.From()))
 	to, _ := FromString(string(d.To()))
+
+	if from == nil {
+		return date.Before(to)
+	}
+
+	if to == nil {
+		return date.After(from)
+	}
+
 	return date.Between(from, to)
 }
 
@@ -116,8 +125,6 @@ func (d *Range) format(date any) (datetime.Interface, error) {
 		return New(i.Year(), int(i.Month()), i.Day())
 	case *Date:
 		return i, nil
-	case Date:
-		return &i, nil
 	case string:
 		return FromString(i)
 	default:

@@ -283,9 +283,19 @@ func TestDateRange(t *testing.T) {
 			})
 		}
 
+		t.Run("New range invalid from and to", func(t *testing.T) {
+			_, err := date.NewRange(
+				"invalid", "2026-01-31", datetime.RangeStartStrict, datetime.RangeEndStrict)
+			assert.Error(t, err)
+			_, err = date.NewRange(
+				"2025-01-31", "invalid", datetime.RangeStartStrict, datetime.RangeEndStrict)
+			assert.Error(t, err)
+		})
+
 	})
 
 	t.Run("Range Is", func(t *testing.T) {
+		d, _ := date.New(2025, 5, 6)
 		tests := []struct {
 			rangeStr    string
 			testDate    any
@@ -296,7 +306,10 @@ func TestDateRange(t *testing.T) {
 			{"[2025-01-31 14:15:16, 2026-01-31 17:18:19]", "2025-05-06 20:21:22", true, true},
 			{"[, 2026-01-31 17:18:19]", "2025-05-06 20:21:22", true, true},
 			{"[2025-01-31 14:15:16, ]", "2025-05-06 20:21:22", true, true},
-			{"[2025-01-31 14:15:16, ]", time.Date(2025, 5, 6, 20, 21, 22, 0, time.UTC), true, true},
+			{"[2025-01-31, ]", time.Date(2025, 5, 6, 20, 21, 22, 0, time.UTC), false, true},
+			{"[2025-01-31, ]", d, false, true},
+			{"[, 2029-01-31]", d, false, true},
+			{"[, 2029-01-31]", 30, false, false},
 			{"[2025-01-31 14:15:16, 2026-01-31]", "2025-05-06", true, false},
 			{"[2025-01-31 14:15:16, 2026-01-31 17:18:19]", 2025, true, false},
 			{"[, ]", date.Now(), true, false},
@@ -304,7 +317,7 @@ func TestDateRange(t *testing.T) {
 		}
 
 		for _, tt := range tests {
-			t.Run("New Range: "+tt.rangeStr+fmt.Sprintf(", valid date: %v", tt.testDate), func(t *testing.T) {
+			t.Run("New Range: "+tt.rangeStr, func(t *testing.T) {
 				if tt.expectedErr {
 					r, err := date.RangeFromString(tt.rangeStr)
 					assert.Error(t, err)

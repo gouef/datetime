@@ -13,7 +13,10 @@ import (
 
 const (
 	Regexp         = `^(\d{2}):(\d{2}):(\d{2})?$`
-	DateTimeRegexp = `^(((\d{4})-(\d{2})-(\d{2}))( ))?((\d{2}):(\d{2}):(\d{2}))$`
+	DateRegexp     = datetime.YearRegexp + `-` + datetime.MonthRegexp + `-` + datetime.DayRegexp
+	TimeRegexp     = `(` + datetime.HourRegexp + `):(` + datetime.MinuteRegexp + `):(` + datetime.SecondRegexp + `)`
+	DateTimeRegexp = `((` + DateRegexp + `)?\s*(` + TimeRegexp + `))`
+	//DateTimeRegexp = `^((` + datetime.DateRegexp + `)?\s*((` + datetime.HourRegexp + `):(` + datetime.MinuteRegexp + `):(` + datetime.SecondRegexp + `)))$`
 )
 
 type Time struct {
@@ -21,6 +24,17 @@ type Time struct {
 	Minute   int `validate:"min=0,max=59"`
 	Second   int `validate:"min=0,max=59"`
 	DateTime goTime.Time
+}
+
+func Now() *Time {
+	now := goTime.Now()
+
+	return &Time{
+		Hour:     now.Hour(),
+		Minute:   now.Minute(),
+		Second:   now.Second(),
+		DateTime: now,
+	}
 }
 
 func New(hour, minute, second int) (datetime.Interface, error) {
@@ -54,7 +68,7 @@ func FromString(value string) (datetime.Interface, error) {
 	errs := validator.Validate(value, constraints.RegularExpression{Regexp: DateTimeRegexp})
 
 	if len(errs) != 0 {
-		return nil, errors.New(fmt.Sprintf("unsupported format of date \"%s\"", value))
+		return nil, errors.New(fmt.Sprintf("unsupported format of time \"%s\"", value))
 	}
 
 	re := regexp.MustCompile(DateTimeRegexp)
@@ -89,5 +103,13 @@ func (t *Time) Equal(u datetime.Interface) bool {
 }
 
 func (t *Time) Between(start, end datetime.Interface) bool {
-	return t.Time().Before(end.Time()) && t.Time().After(start.Time())
+	return t.Before(end) && t.After(start)
+}
+
+func (t *Time) Before(u datetime.Interface) bool {
+	return t.Time().Before(u.Time())
+}
+
+func (t *Time) After(u datetime.Interface) bool {
+	return t.Time().After(u.Time())
 }

@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	Regexp = `^(\d{4})-(\d{2})-(\d{2})( (\d{2}):(\d{2}):(\d{2}))?$`
+	Regexp = `^((\d+)-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]))\s(0[0-9]|1[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$`
 )
 
 type DateTime struct {
@@ -96,19 +96,14 @@ func FromString(value string) (Interface, error) {
 
 	re := regexp.MustCompile(Regexp)
 	match := re.FindStringSubmatch(value)
-	year, _ := strconv.Atoi(match[1])
-	month, _ := strconv.Atoi(match[2])
-	day, _ := strconv.Atoi(match[3])
+	year, _ := strconv.Atoi(match[2])
+	month, _ := strconv.Atoi(match[3])
+	day, _ := strconv.Atoi(match[4])
+	hour, _ := strconv.Atoi(match[5])
+	minute, _ := strconv.Atoi(match[6])
+	second, _ := strconv.Atoi(match[7])
 
-	if match[4] != "" {
-		hour, _ := strconv.Atoi(match[5])
-		minute, _ := strconv.Atoi(match[6])
-		second, _ := strconv.Atoi(match[7])
-
-		return New(year, month, day, hour, minute, second)
-	}
-
-	return nil, errors.New(fmt.Sprintf("unsupported format of datetime \"%s\". time is missing.", value))
+	return New(year, month, day, hour, minute, second)
 }
 
 func (d *DateTime) FromString(value string) (Interface, error) {
@@ -143,7 +138,15 @@ func (d *DateTime) Equal(u Interface) bool {
 }
 
 func (d *DateTime) Between(start, end Interface) bool {
-	return d.Time().Before(end.Time()) && d.Time().After(start.Time())
+	return d.Before(end) && d.After(start)
+}
+
+func (d *DateTime) Before(u Interface) bool {
+	return d.Time().Before(u.Time())
+}
+
+func (d *DateTime) After(u Interface) bool {
+	return d.Time().After(u.Time())
 }
 
 func DaysInMonthList(year int, month int) []int {

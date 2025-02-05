@@ -24,6 +24,17 @@ type Date struct {
 	DateTime time.Time
 }
 
+func Now() *Date {
+	now := time.Now()
+
+	return &Date{
+		Year:     now.Year(),
+		Month:    int(now.Month()),
+		Day:      now.Day(),
+		DateTime: now,
+	}
+}
+
 func New(year, month, day int) (datetime.Interface, error) {
 	errs := validator.Validate(year, constraints.GreaterOrEqual{Value: 0})
 
@@ -95,5 +106,13 @@ func (d *Date) Equal(u datetime.Interface) bool {
 }
 
 func (d *Date) Between(start, end datetime.Interface) bool {
-	return d.Time().Before(end.Time()) && d.Time().After(start.Time())
+	return d.Before(end) && d.After(start)
+}
+
+func (d *Date) Before(u datetime.Interface) bool {
+	return d.Time().Before(u.Time())
+}
+
+func (d *Date) After(u datetime.Interface) bool {
+	return d.Time().After(u.Time())
 }

@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"fmt"
 	"github.com/gouef/datetime"
 	"github.com/gouef/datetime/date"
 	"github.com/stretchr/testify/assert"
@@ -199,4 +200,225 @@ func TestDateToString(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestDateRange(t *testing.T) {
+	t.Run("New Date Range", func(t *testing.T) {
+		tests := []struct {
+			rangeStr         string
+			testDate         any
+			expectedErr      bool
+			expectedValidErr bool
+			expected         func() any
+		}{
+			{"[2025-01-31, 2026-01-31]", "2025-05-06", false, false, func() any {
+				val, err := date.NewRangeStrict(
+					"2025-01-31", "2026-01-31")
+				assert.NoError(t, err)
+				return val
+			}},
+			{"[2025-01-31 14:15:16, 2026-01-31 17:18:19]", "2025-05-06 20:21:22", true, false, func() any {
+				val, err := date.NewRange(
+					"2025-01-31 14:15:16", "2026-01-31 17:18:19", datetime.RangeStart("["), datetime.RangeEnd("]"))
+				assert.NoError(t, err)
+				return val
+			}},
+			{"[, 2026-01-31 17:18:19]", "2025-05-06 20:21:22", true, false, func() any {
+				val, err := date.NewRange(
+					"", "2026-01-31 17:18:19", datetime.RangeStart("["), datetime.RangeEnd("]"))
+				assert.NoError(t, err)
+				return val
+			}},
+			{"[2025-01-31 14:15:16, ]", "2025-05-06 20:21:22", true, false, func() any {
+				val, err := date.NewRange(
+					"2025-01-31 14:15:16", "", datetime.RangeStart("["), datetime.RangeEnd("]"))
+				assert.NoError(t, err)
+				return val
+			}},
+			{"[2025-01-31 14:15:16, ]", time.Date(2025, 5, 6, 20, 21, 22, 0, time.UTC), true, false, func() any {
+				val, err := date.NewRange(
+					"2025-01-31 14:15:16", "", datetime.RangeStart("["), datetime.RangeEnd("]"))
+				assert.NoError(t, err)
+				return val
+			}},
+			{"[2025-01-31 14:15:16, 2026-01-31]", "2025-05-06", true, false, nil},
+			{"[2025-01-31 14:15:16, 2026-01-31 17:18:19]", 2025, true, true, func() any {
+				val, err := date.NewRange(
+					"2025-01-31 14:15:16", "2026-01-31 17:18:19", datetime.RangeStart("["), datetime.RangeEnd("]"))
+				assert.NoError(t, err)
+				return val
+			}},
+			{"[, ]", date.Now(), true, true, func() any {
+				val, err := date.NewRange(
+					"", "", datetime.RangeStart("["), datetime.RangeEnd("]"))
+				assert.Error(t, err)
+				return val
+			}},
+			{"[2025-01-31 14:15:16, 2026-02-31 14:15:16]", date.Now(), true, true, func() any {
+				val, err := date.NewRange(
+					"2025-01-31 14:15:16", "2026-02-31 14:15:16", datetime.RangeStart("["), datetime.RangeEnd("]"))
+				assert.Error(t, err)
+				return val
+			}},
+		}
+
+		for _, tt := range tests {
+			t.Run("New Range: "+tt.rangeStr+fmt.Sprintf(", valid date: %v", tt.testDate), func(t *testing.T) {
+				if tt.expectedErr {
+					r, err := date.RangeFromString(tt.rangeStr)
+					assert.Error(t, err)
+					assert.Nil(t, r)
+
+				} else {
+					r, err := date.RangeFromString(tt.rangeStr)
+					assert.NoError(t, err)
+					assert.Equal(t, tt.expected(), r)
+					if tt.expectedValidErr {
+						assert.False(t, r.Is(tt.testDate))
+					} else {
+						assert.True(t, r.Is(tt.testDate))
+						assert.Equal(t, tt.rangeStr, r.String())
+					}
+				}
+			})
+		}
+
+		t.Run("New range invalid from and to", func(t *testing.T) {
+			_, err := date.NewRange(
+				"invalid", "2026-01-31", datetime.RangeStartStrict, datetime.RangeEndStrict)
+			assert.Error(t, err)
+			_, err = date.NewRange(
+				"2025-01-31", "invalid", datetime.RangeStartStrict, datetime.RangeEndStrict)
+			assert.Error(t, err)
+		})
+
+	})
+
+	t.Run("Range Is", func(t *testing.T) {
+		d, _ := date.New(2025, 5, 6)
+		tests := []struct {
+			rangeStr    string
+			testDate    any
+			expectedErr bool
+			expected    bool
+		}{
+			{"[2025-01-31, 2026-01-31]", "2025-05-06", false, true},
+			{"[2025-01-31 14:15:16, 2026-01-31 17:18:19]", "2025-05-06 20:21:22", true, true},
+			{"[, 2026-01-31 17:18:19]", "2025-05-06 20:21:22", true, true},
+			{"[2025-01-31 14:15:16, ]", "2025-05-06 20:21:22", true, true},
+			{"[2025-01-31, ]", time.Date(2025, 5, 6, 20, 21, 22, 0, time.UTC), false, true},
+			{"[2025-01-31, ]", d, false, true},
+			{"[, 2029-01-31]", d, false, true},
+			{"[, 2029-01-31]", 30, false, false},
+			{"[2025-01-31 14:15:16, 2026-01-31]", "2025-05-06", true, false},
+			{"[2025-01-31 14:15:16, 2026-01-31 17:18:19]", 2025, true, false},
+			{"[, ]", date.Now(), true, false},
+			{"[2, ]", date.Now(), true, false},
+		}
+
+		for _, tt := range tests {
+			t.Run("New Range: "+tt.rangeStr, func(t *testing.T) {
+				if tt.expectedErr {
+					r, err := date.RangeFromString(tt.rangeStr)
+					assert.Error(t, err)
+					assert.Nil(t, r)
+
+				} else {
+					r, err := date.RangeFromString(tt.rangeStr)
+					assert.NoError(t, err)
+					assert.Equal(t, tt.expected, r.Is(tt.testDate))
+				}
+			})
+		}
+	})
+
+	t.Run("Range brackets", func(t *testing.T) {
+		tests := []struct {
+			expectedErr bool
+			start       string
+			from        string
+			to          string
+			end         string
+			expected    func() any
+		}{
+			{false, "[", "2025-01-31", "2026-01-31", "]", func() any {
+				val, err := date.NewRangeStrict("2025-01-31", "2026-01-31")
+				assert.NoError(t, err)
+				return val
+			}},
+			{false, "[", "2025-01-31 14:15:16", "2026-01-31 17:18:19", "]", func() any {
+				val, err := date.NewRangeStrict("2025-01-31 14:15:16", "2026-01-31 17:18:19")
+				assert.NoError(t, err)
+				return val
+			}},
+			{false, "[", "", "2026-01-31 17:18:19", "]", func() any {
+				val, err := date.NewRangeStrict("", "2026-01-31 17:18:19")
+				assert.NoError(t, err)
+				return val
+			}},
+			{false, "[", "2025-01-31 14:15:16", "", "]", func() any {
+				val, err := date.NewRangeStrict("2025-01-31 14:15:16", "")
+				assert.NoError(t, err)
+				return val
+			}},
+			{false, "(", "2025-01-31 14:15:16", "2026-01-31 17:18:19", "]", func() any {
+				val, err := date.NewRangeStartOptional("2025-01-31 14:15:16", "2026-01-31 17:18:19")
+				assert.NoError(t, err)
+				return val
+			}},
+			{false, "(", "", "2026-01-31 17:18:19", "]", func() any {
+				val, err := date.NewRangeStartOptional("", "2026-01-31 17:18:19")
+				assert.NoError(t, err)
+				return val
+			}},
+			{false, "(", "2025-01-31 14:15:16", "", "]", func() any {
+				val, err := date.NewRangeStartOptional("2025-01-31 14:15:16", "")
+				assert.NoError(t, err)
+				return val
+			}},
+			{false, "(", "2025-01-31 14:15:16", "2026-01-31 17:18:19", ")", func() any {
+				val, err := date.NewRangeOptional("2025-01-31 14:15:16", "2026-01-31 17:18:19")
+				assert.NoError(t, err)
+				return val
+			}},
+			{false, "(", "", "2026-01-31 17:18:19", ")", func() any {
+				val, err := date.NewRangeOptional("", "2026-01-31 17:18:19")
+				assert.NoError(t, err)
+				return val
+			}},
+			{false, "(", "2025-01-31 14:15:16", "", ")", func() any {
+				val, err := date.NewRangeOptional("2025-01-31 14:15:16", "")
+				assert.NoError(t, err)
+				return val
+			}},
+			{false, "[", "2025-01-31 14:15:16", "2026-01-31 17:18:19", ")", func() any {
+				val, err := date.NewRangeStartStrict("2025-01-31 14:15:16", "2026-01-31 17:18:19")
+				assert.NoError(t, err)
+				return val
+			}},
+			{false, "[", "", "2026-01-31 17:18:19", ")", func() any {
+				val, err := date.NewRangeStartStrict("", "2026-01-31 17:18:19")
+				assert.NoError(t, err)
+				return val
+			}},
+			{false, "[", "2025-01-31 14:15:16", "", ")", func() any {
+				val, err := date.NewRangeStartStrict("2025-01-31 14:15:16", "")
+				assert.NoError(t, err)
+				return val
+			}},
+		}
+
+		for _, tt := range tests {
+			t.Run("New Range brackets: "+fmt.Sprintf("From: %s%s, To: %s%s", tt.start, tt.from, tt.to, tt.end), func(t *testing.T) {
+				r, err := date.NewRange(tt.from, tt.to, datetime.RangeStart(tt.start), datetime.RangeEnd(tt.end))
+
+				if tt.expectedErr {
+					assert.Error(t, err)
+				} else {
+					assert.NoError(t, err)
+					assert.Equal(t, tt.expected(), r)
+				}
+			})
+		}
+	})
 }

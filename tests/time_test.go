@@ -156,6 +156,15 @@ func TestTimeFromString(t *testing.T) {
 
 func TestTimeRange(t *testing.T) {
 	t.Run("New Range", func(t *testing.T) {
+
+		val, err := time.NewRange("", "", datetime.RangeStart("["), datetime.RangeEnd("]"))
+		assert.Error(t, err)
+		assert.Nil(t, val)
+
+		val, err = time.NewRange("", "invalid", datetime.RangeStart("["), datetime.RangeEnd("]"))
+		assert.Error(t, err)
+		assert.Nil(t, val)
+
 		tests := []struct {
 			rangeStr         string
 			testDate         any
@@ -199,6 +208,18 @@ func TestTimeRange(t *testing.T) {
 				assert.NoError(t, err)
 				return val
 			}},
+			{"[invalid, 17:18:19]", 2025, true, true, func() any {
+				val, err := time.NewRange(
+					"14:15:16", "17:18:19", datetime.RangeStart("["), datetime.RangeEnd("]"))
+				assert.NoError(t, err)
+				return val
+			}},
+			{"[14:15:16, invalid]", 2025, true, true, func() any {
+				val, err := time.NewRange(
+					"14:15:16", "invalid", datetime.RangeStart("["), datetime.RangeEnd("]"))
+				assert.NoError(t, err)
+				return val
+			}},
 			{"[, ]", time.Now(), true, true, func() any {
 				val, err := time.NewRange(
 					"", "", datetime.RangeStart("["), datetime.RangeEnd("]"))
@@ -231,6 +252,9 @@ func TestTimeRange(t *testing.T) {
 	})
 
 	t.Run("Range Is", func(t *testing.T) {
+		ttTime, err := time.New(20, 21, 22)
+		assert.Nil(t, err)
+
 		tests := []struct {
 			rangeStr    string
 			testDate    any
@@ -242,11 +266,12 @@ func TestTimeRange(t *testing.T) {
 			{"[, 2026-01-31 17:18:19]", "2025-05-06 16:21:22", false, true},
 			{"[2025-01-31 14:15:16, ]", "2025-05-06 15:21:22", false, true},
 			{"[2025-01-31 14:15:16, ]", goTime.Date(2025, 5, 6, 20, 21, 22, 0, goTime.UTC), false, true},
+			{"[2025-01-31 14:15:16, ]", ttTime, false, true},
 			{"[2025-01-31, 2026-01-31]", "2025-05-06", true, false},
 			{"[2025-01-31 14:15:16, 2026-01-31]", "2025-05-06", true, false},
 			{"[2025-01-31 14:15:16, 2026-01-31 17:18:19]", 2025, false, false},
-			{"[, ]", datetime.Now(), true, false},
-			{"[2, ]", datetime.Now(), true, false},
+			{"[, ]", time.Now(), true, false},
+			{"[2, ]", time.Now(), true, false},
 		}
 
 		for _, tt := range tests {

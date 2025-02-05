@@ -123,10 +123,6 @@ func (d *Range) Is(value any) bool {
 	from, _ := FromString(string(d.from))
 	to, _ := FromString(string(d.to))
 
-	if from == nil && to == nil {
-		return false
-	}
-
 	if from == nil {
 		return date.Before(to)
 	}
@@ -148,8 +144,6 @@ func (d *Range) format(date any) (datetime.Interface, error) {
 		return New(i.Hour(), i.Minute(), i.Second())
 	case *Time:
 		return i, nil
-	case Time:
-		return &i, nil
 	case string:
 		return FromString(i)
 	default:
